@@ -5,4 +5,7 @@ gedit meu_robo.py*
 
 2- *python3 meu_robo.py*
 
+Usei o código do JV como base
+
+
 
