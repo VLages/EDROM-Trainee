@@ -1,0 +1,97 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/universal_robots/protos/UR5e.proto"
+
+WorldInfo {
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation -0.08402894393741998 0.06714872707780989 -0.9941982624369204 1.7743312840202765
+  position 0.6759368161287935 4.099547198367601 0.3490551486720618
+}
+TexturedBackground {
+  texture "stadium"
+}
+TexturedBackgroundLight {
+  texture "stadium"
+}
+Solid {
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.2 0.2
+        roughness 0.3
+      }
+      geometry Box {
+        size 5 5 0.05
+      }
+    }
+  ]
+  name "floor"
+  boundingObject Box {
+    size 5 5 0.05
+  }
+}
+UR5e {
+  hidden position_0_0 -0.20999999551322635
+  hidden rotation_1 0 0 -1 0.20999999551322693
+  hidden position_1_0 -0.4499490166797372
+  hidden linearVelocity_1 3.851474899026226e-09 -6.798589706787337e-10 3.849668928386648e-09
+  hidden angularVelocity_1 2.5210576922687626e-10 -1.4026745913738255e-09 -5.4298707910033284e-08
+  hidden rotation_2 0 1 0 1.1208469833202621
+  hidden position_2_0 -0.17998622233347117
+  hidden linearVelocity_2 1.536723549339316e-08 -1.3660715401415742e-08 8.327004262542868e-09
+  hidden angularVelocity_2 -2.8870509663812005e-11 -2.690713062616274e-09 -5.426528148697016e-08
+  hidden rotation_3 0 -1 0 0.17998622233347042
+  hidden position_3_0 3.2910372226490505e-06
+  hidden linearVelocity_3 9.670523757688568e-09 -2.992492359374018e-08 1.3160884108610332e-08
+  hidden angularVelocity_3 3.307950626597377e-10 -3.5912127975615035e-09 -5.500012264752837e-08
+  hidden rotation_4 0 1 0 1.5707992910372226
+  hidden position_4_0 -7.870724809532141e-07
+  hidden linearVelocity_4 1.9256586965384754e-08 -4.3061592111843164e-08 1.8076925871758527e-08
+  hidden angularVelocity_4 8.736519963937748e-06 4.0981298135460946e-05 -5.6255417320410634e-08
+  hidden rotation_5 0 0 -1 7.868038882281882e-07
+  hidden position_5_0 -0.20999934925120112
+  hidden linearVelocity_5 -3.2875592577054514e-06 6.585435801661985e-07 -2.446094671588888e-06
+  hidden angularVelocity_5 1.2450533175048426e-05 4.018883437638675e-05 -5.265927428203574e-06
+  hidden rotation_6 0 -1 0 0.20999934925120037
+  hidden linearVelocity_6 -2.920911258017051e-06 5.804064171890476e-07 -2.175585248997783e-06
+  hidden angularVelocity_6 1.0835573108565107e-05 3.2612011221503746e-05 -5.265878293872259e-06
+  translation 0 0 0.025
+  name "ur5e"
+  controller "teleop_controller"
+  toolSlot [
+    Pose {
+      translation 0 0 0.15
+      rotation 1 0 0 -1.57
+      children [
+        Camera {
+          fieldOfView 1.2
+          width 640
+          height 480
+          far 3
+        }
+      ]
+    }
+  ]
+}
+Solid {
+  translation 0.58 0.12 0.08
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        roughness 0.3
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "target_red"
+  boundingObject Sphere {
+    radius 0.05
+  }
+}
