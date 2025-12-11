@@ -1,0 +1,108 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/universal_robots/protos/UR5e.proto"
+
+WorldInfo {
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation -0.14678061498222406 -0.338421035609215 0.9294765482370313 5.430451659922227
+  position -6.6238045390975255 4.3322049548884225 2.1264776864796913
+}
+TexturedBackground {
+  texture "noon_cloudy_mountains"
+}
+TexturedBackgroundLight {
+  texture "stadium"
+}
+Solid {
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.2 0.2
+        roughness 0.3
+      }
+      geometry Box {
+        size 5 5 0.05
+      }
+    }
+  ]
+  name "floor"
+  boundingObject Box {
+    size 5 5 0.05
+  }
+}
+UR5e {
+  hidden position_0_0 1.1151063275504414
+  hidden translation_1 0 0 0.163
+  hidden rotation_1 0 0 1 1.1151063275504414
+  hidden position_1_0 -0.9070303961633227
+  hidden linearVelocity_1 6.64072695255368e-12 1.3549108792810875e-11 -5.259268785902261e-15
+  hidden angularVelocity_1 -7.028001207610388e-09 3.444537920880873e-09 -7.65067467430903e-13
+  hidden translation_2 0 0.138 0
+  hidden rotation_2 0 1 0 0.6637656038366758
+  hidden position_2_0 1.2763073726838188
+  hidden linearVelocity_2 3.070076998918666e-05 6.264176582610561e-05 -5.456699966097265e-05
+  hidden angularVelocity_2 -0.0003742553777579652 0.00018341964199078284 -3.628718163004799e-09
+  hidden translation_3 0 -0.131 0.425
+  hidden rotation_3 0 0.9999999999999999 0 1.2763073726838188
+  hidden position_3_0 -1.4382993872882592
+  hidden linearVelocity_3 4.76057372448454e-05 9.713193247711365e-05 -0.00019012889255209524
+  hidden angularVelocity_3 -0.0005199204372397312 0.00025480895144654804 -6.9100412656346585e-09
+  hidden translation_4 0 0 0.392
+  hidden rotation_4 0 1 0 0.13249661271174198
+  hidden position_4_0 -6.331592415558755e-05
+  hidden linearVelocity_4 2.534850899143688e-05 5.171401946074381e-05 -0.00032080065346506086
+  hidden angularVelocity_4 -0.0005327791397010213 0.00026111090114223505 -8.996370280596795e-09
+  hidden translation_5 0 0.127 0
+  hidden rotation_5 0 0 -1 6.331592292868072e-05
+  hidden position_5_0 -3.3745599310965394e-08
+  hidden linearVelocity_5 1.2789616393859191e-05 2.608663197611429e-05 -0.0003728182653500107
+  hidden angularVelocity_5 -0.000533638792540041 0.00025935602726604655 1.063002928515271e-06
+  hidden translation_6 0 0 0.1
+  hidden rotation_6 0 -1 0 2.9802322387695313e-08
+  hidden linearVelocity_6 1.275510212321672e-05 2.6016180381209592e-05 -0.00037295572884809143
+  hidden angularVelocity_6 -0.0005336387925272415 0.00025935602726676266 1.0628822581313558e-06
+  translation 0 0 0.125
+  controller "<extern>"
+  toolSlot [
+    Pose {
+      translation 0 0 0.15
+      rotation 1 0 0 -1.57
+      children [
+        Camera {
+          translation -0.00903717 0.145581 0.00490856
+          rotation 0.6615940857912262 -0.575784074663941 -0.4803810622926977 1.79133
+          fieldOfView 1.2
+          width 640
+          height 480
+          far 3
+        }
+      ]
+    }
+  ]
+}
+Solid {
+  translation 0.05702999896601536 1.0225275931741908 0.07458907968091043
+  rotation 0.6301174599203815 -0.4535954649989424 0.6302405420439718 2.287715354540707
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        roughness 0.3
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "target_red"
+  boundingObject Sphere {
+    radius 0.05
+  }
+  physics Physics {
+  }
+  linearVelocity 0 0 3.802144535630116e-16
+}
