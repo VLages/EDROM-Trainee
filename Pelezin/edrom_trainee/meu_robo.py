@@ -66,7 +66,7 @@ class ControladorUR5e(Node):
 
         self.get_logger().info("Controlador UR5e iniciado com sucesso!")
 
-    # TECLADO ---
+    # TECLADO
     def ler_teclado(self):
         tecla = self.teclado.getKey()
         if tecla == -1: return
@@ -111,11 +111,9 @@ class ControladorUR5e(Node):
         largura = self.camera.getWidth()
         altura = self.camera.getHeight()
         
-        # Converter dados brutos para imagem que o OpenCV entende
         img_matriz = np.frombuffer(imagem_bruta, np.uint8).reshape((altura, largura, 4))
-        img_bgr = img_matriz[:, :, :3].copy() # Remover canal Alpha
+        img_bgr = img_matriz[:, :, :3].copy() 
 
-        # Converter para HSV (Melhor para detectar cores)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         
         # Faixas de cor vermelha
@@ -135,7 +133,6 @@ class ControladorUR5e(Node):
             maior_contorno = max(contornos, key=cv2.contourArea)
             area_contorno = cv2.contourArea(maior_contorno)
 
-            # Só processar se for grande o suficiente
             if area_contorno > 100:
                 momentos = cv2.moments(maior_contorno)
                 if momentos["m00"] != 0:
