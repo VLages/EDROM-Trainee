@@ -1,0 +1,40 @@
+================================================================================
+ARQUIVO: teleop_controller_JV
+================================================================================
+
+[CONTEXTO/EVOLUÇÃO]
+Este é o código base/inicial. Implementa controle manual e visão computacional básica.
+
+[RESUMO PRÁTICO]
+Controlador para robô UR5e no simulador Webots que permite movimentação manual das juntas via teclado e detecta objetos vermelhos pela câmera, enviando as coordenadas via ROS2.
+
+[ESTRUTURA GERAL]
+1. Inicialização: Configura ROS2, Motores do robô, Câmera e Teclado.
+2. Loop Principal (enquanto a simulação roda):
+   -> Leitura do Teclado (seleciona e move juntas).
+   -> Aplicação de Movimento (envia posições aos motores).
+   -> Processamento de Imagem (detecta vermelho e publica X,Y no ROS2).
+
+[FUNÇÕES PRINCIPAIS]
+> handle_keyboard()
+  - O que faz: Lê teclas pressionadas. Teclas '1'-'6' selecionam a junta. Teclas '+' e '-' incrementam/decrementam a posição. 'Espaço' reseta tudo.
+  - Retorno: Nenhum (altera variáveis internas).
+
+> apply_positions()
+  - O que faz: Envia os ângulos armazenados na lista 'self.joint_positions' para os motores físicos do simulador.
+  - Retorno: Nenhum.
+
+> process_camera()
+  - O que faz: Captura imagem, converte para HSV, cria máscara para cor VERMELHA, acha o contorno e calcula o centro (X, Y).
+  - Retorno: Publica array [x, y] no tópico ROS2 "object_coords".
+
+> run()
+  - O que faz: Mantém o loop de passo (step) do Webots ativo chamando as funções acima repetidamente.
+
+[VARIÁVEIS IMPORTANTES]
+* self.joint_positions: Lista com 6 valores (float) representando o ângulo alvo atual de cada junta.
+* self.current_joint: Índice (0 a 5) indicando qual junta está selecionada para controle no momento.
+* self.limits: Lista de tuplas com limites mínimo e máximo de rotação para cada junta (proteção mecânica).
+* self.publisher: Objeto ROS2 responsável por enviar as coordenadas da câmera para fora do nó.
+
+================================================================================

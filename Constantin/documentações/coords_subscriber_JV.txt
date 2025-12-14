@@ -1,0 +1,29 @@
+================================================================================
+ARQUIVO: coords_subscriber
+================================================================================
+
+[CONTEXTO/EVOLUÇÃO]
+Este código funciona em par com o anterior (`teleop_controller_JV`). Enquanto o primeiro *publica* as coordenadas da câmera, este código *assina* (lê) essas coordenadas.
+
+[RESUMO PRÁTICO]
+Um nó simples de monitoramento ROS2. Ele escuta o tópico "object_coords" e imprime no terminal as coordenadas X e Y recebidas, útil para debug ou verificação de dados.
+
+[ESTRUTURA GERAL]
+1. Inicialização ROS2 e criação do Nó.
+2. Criação da Assinatura (Subscription) no tópico específico.
+3. Loop de espera (rclpy.spin): O código fica "dormindo" até chegar uma mensagem.
+4. Execução do Callback: Quando uma mensagem chega, a função de callback processa e exibe o dado.
+
+[FUNÇÕES PRINCIPAIS]
+> __init__()
+  - O que faz: Configura o nó e diz ao ROS2: "Avise-me quando chegar algo no tópico 'object_coords'".
+  
+> callback(msg)
+  - O que faz: É chamada automaticamente pelo ROS2 toda vez que chega uma mensagem. Extrai x e y da lista `msg.data` e mostra no log.
+  - Retorno: Nenhum (apenas log visual).
+
+[VARIÁVEIS IMPORTANTES]
+* self.subscription: Objeto que mantém a conexão ativa com o tópico.
+* msg.data: Lista de floats recebida do publisher (ex: [120.5, 300.0]).
+
+================================================================================

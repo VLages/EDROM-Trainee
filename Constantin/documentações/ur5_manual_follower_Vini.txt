@@ -1,0 +1,47 @@
+================================================================================
+ARQUIVO: UR5ManualFollow (Controlador Híbrido)
+================================================================================
+
+[CONTEXTO/EVOLUÇÃO]
+Este código unifica os conceitos dos dois anteriores (`teleop` e `subscriber`).
+Diferença chave: Em vez de apenas publicar as coordenadas (X,Y) para outro nó, este código usa esses dados internamente para fazer o robô seguir o objeto autonomamente (Visual Servoing).
+
+[RESUMO PRÁTICO]
+Controlador híbrido para o UR5e. Possui dois estados alternáveis pela tecla 'M':
+1. MANUAL: O operador controla cada junta individualmente pelo teclado.
+2. FOLLOW: O robô move a base e o ombro sozinho para centralizar uma bola vermelha na imagem.
+
+[ESTRUTURA GERAL]
+1. Inicialização: Configura robô, câmera, teclado e coloca motores em "Modo Velocidade" (pos = inf).
+2. Loop de Controle (Timer):
+   -> Processamento de Visão: Captura imagem, filtra cor vermelha, acha o centro (cx, cy).
+   -> Leitura de Teclado: Verifica troca de modo ('M') ou comandos de movimento.
+   -> Lógica de Controle:
+      - Se MANUAL: Aplica velocidades fixas baseadas nas teclas pressionadas.
+      - Se FOLLOW: Calcula erro (distância do centro da imagem) e aplica velocidade proporcional para corrigir.
+
+[FUNÇÕES PRINCIPAIS]
+> run_loop()
+  - O que faz: É o "cérebro" do robô, executado a cada passo de tempo (timestep). Contém toda a lógica de visão, decisão e atuação.
+  - Retorno: Nenhum.
+
+> Lógica de Visão (dentro do run_loop)
+  - O que faz: Converte imagem para HSV, cria máscara para tons de vermelho/laranja, remove ruído e desenha o alvo na tela.
+  
+> Lógica Follow/Perseguição (dentro do run_loop)
+  - O que faz: Usa a fórmula `Erro * Ganho (Kp)` para definir a velocidade dos motores. Se a bola está à esquerda, gira a base para a esquerda até centralizar.
+
+[VARIÁVEIS IMPORTANTES]
+* self.modos: Lista ['MANUAL', 'FOLLOW'] definindo os estados possíveis.
+* self.kp: Ganho Proporcional (2.0). Define a "agressividade" com que o robô reage ao movimento da bola.
+* self.motors: Lista de objetos dos motores. Nota: Estão configurados para aceitar velocidade (setVelocity), não posição.
+* cx, cy: Coordenadas do centro do objeto detectado na imagem (pixels).
+* erro_x, erro_y: Distância normalizada (-0.5 a 0.5) entre o objeto e o centro da câmera.
+
+[COMANDOS (MODO MANUAL)]
+* 'M': Alterna entre Manual e Follow.
+* WASD: Base e Ombro.
+* Q/E: Cotovelo.
+* T/G, F/H, R/Y: Punhos.
+
+================================================================================

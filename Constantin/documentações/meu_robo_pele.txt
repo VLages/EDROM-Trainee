@@ -1,0 +1,45 @@
+================================================================================
+ARQUIVO: UR5eNode_Enhanced (Teleop + Visão com GUI)
+================================================================================
+
+[CONTEXTO/EVOLUÇÃO]
+Este código é uma evolução direta do Código 1 (`teleop_controller_JV`).
+Principais diferenças/melhorias:
+1. Adiciona interface visual local (`cv2.imshow`) para ver o que o robô vê.
+2. Adiciona o cálculo da ÁREA do objeto na mensagem ROS2 (antes era só X, Y).
+3. Integração ROS2 mais correta dentro do loop (`rclpy.spin_once`).
+4. Tratamento de erro melhorado para caso a câmera não seja encontrada.
+
+[RESUMO PRÁTICO]
+Nó de controle manual (teleoperação) que detecta objetos vermelhos. O usuário move o robô tecla por tecla, enquanto o script exibe uma janela de vídeo com o reconhecimento do objeto e publica os dados (X, Y, Área) para a rede ROS2.
+
+[ESTRUTURA GERAL]
+1. Inicialização: Conecta ao Webots, tenta achar a câmera (padrão ou 'camera_fixa'), configura ROS2 Publisher.
+2. Loop Principal (While step != -1):
+   -> Sincronia ROS (spin_once): Garante que o ROS processe callbacks pendentes.
+   -> Teclado: Lê entradas e ajusta a lista de posições alvo.
+   -> Motores: Envia as posições para o robô.
+   -> Visão: Processa a imagem, desenha contornos na tela e publica dados.
+
+[FUNÇÕES PRINCIPAIS]
+> handle_keyboard()
+  - O que faz: Lê teclas. Números (1-6) escolhem a junta. Teclas (+/-) movem a junta selecionada com limites de segurança (clamping). 'Espaço' reseta.
+  - Retorno: Nenhum.
+
+> process_camera()
+  - O que faz:
+    1. Converte imagem para HSV e filtra vermelho.
+    2. Calcula centro (X, Y) e Área do maior contorno.
+    3. Desenha na tela (`cv2.imshow`) o contorno e o ponto central.
+    4. Publica mensagem ROS com [cx, cy, area].
+  - Retorno: Publica no tópico "object_coords".
+
+> run()
+  - O que faz: Mantém o simulador rodando. Diferente do primeiro código, inclui `rclpy.spin_once(self, timeout_sec=0)` para manter a comunicação ROS saudável sem travar o loop do Webots.
+
+[VARIÁVEIS IMPORTANTES]
+* self.publisher: Envia vetor Float32 `[x, y, area]`.
+* self.joint_positions: Lista que guarda a "memória" de onde cada junta deve estar.
+* self.delta: Passo de movimento (0.05 radianos) a cada toque de tecla.
+
+================================================================================
