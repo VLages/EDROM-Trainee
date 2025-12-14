@@ -130,7 +130,7 @@ class UR5VisualController(Node):
                                 
                                 # Visualização
                                 cv2.rectangle(img_bgr, (x1, y1), (x2, y2), (255, 0, 255), 2)
-                                cv2.putText(img_bgr, f"{conf:.2f}", (x1, y1-10), 
+                                cv2.putText(img_bgr, f"Bola {conf:.2f}", (x1, y1-10), 
                                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 1)
                                 break
                         if found_now: break
