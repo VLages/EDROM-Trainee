@@ -16,8 +16,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.26171922045212437 0.11024041515639113 0.958827461283874 2.2448235736156548
-  position 3.4760075823176395 -2.8494182284448955 3.1533169593190387
+  orientation -0.23271271077749406 0.08631703616772782 0.9687074705553838 2.3064131041530955
+  position 3.1294020495611323 -2.4553400583765925 2.465782470688829
 }
 TexturedBackground {
 }
@@ -31,7 +31,7 @@ RectangleArena {
   }
 }
 FifaSoccerBall {
-  translation 0.39 -0.76 0.7
+  translation 0.83 -0.76 0.69
 }
 PlasticFruitBox {
   translation -0.78 0.28 0.4
