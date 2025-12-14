@@ -1,32 +1,44 @@
+import os
 import rclpy
-import time
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
-import numpy as np
+from geometry_msgs.msg import Point
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 import cv2
-from controller import Robot, Keyboard, DistanceSensor
+import numpy as np
+from ultralytics import YOLO
+from controller import Robot, Keyboard
+
 
 class ControladorUR5e(Node):
     def __init__(self, robo_webots):
         super().__init__("nodo_controlador_ur5e")
+        self.robo = robo_webots
+
+        # Variáves do modo automático
         self.modo_automatico = False
         self.apertar_espaço = False
-        self.robo = robo_webots
         
         # Configuração do Webots
         self.passo_tempo = int(self.robo.getBasicTimeStep())
         self.distancia_sensor = self.robo.getDevice("distance sensor")
         self.distancia_sensor.enable(self.passo_tempo)
         
-        # Variáveis de controle de tempo (Contador de Loops)
+        # Variáveis de controle de tempo
         self.contador_loops = 0         
-        self.inicio_auto_loops = None   
+        self.inicio_auto_loops = None  
+        self.max_patience = 20 
+        self.frame_counter = 0
+        self.target_cx = None
+        self.target_cy = None
+        self.patience = 0
+        self.modo_index = 0
         
         # Configuração do Timer do ROS 2
         periodo_em_segundos = self.passo_tempo / 1000.0
         self.create_timer(periodo_em_segundos, self.executar_modo_automatico)
 
-        
+        # Motores e seus nomes / movimentos
         self.nomes_motores = [
             "shoulder_pan_joint",
             "shoulder_lift_joint",
@@ -35,15 +47,12 @@ class ControladorUR5e(Node):
             "wrist_2_joint",
             "wrist_3_joint",
         ]
-
         self.nomes_motores_garra = [
             "finger_1_joint_1",
             "finger_2_joint_1",
             "finger_middle_joint_1"
         ]
-
         self.motores_total = self.nomes_motores + self.nomes_motores_garra
-
         self.lista_motores = []
         for nome in self.motores_total:
             motor = self.robo.getDevice(nome)
@@ -51,8 +60,7 @@ class ControladorUR5e(Node):
                 motor.setVelocity(1.5)
                 self.lista_motores.append(motor)
             else:
-                self.get_logger().error(f"Motor {nome} não encontrado!")
-                
+                self.get_logger().error(f"Motor {nome} não encontrado!")    
         self.limites = [
             (-6.28, 6.28),
             (-2.09, 2.09),
@@ -61,39 +69,37 @@ class ControladorUR5e(Node):
             (-6.28, 6.28),
             (-6.28, 6.28),
         ]
-
         self.limites_garra = [
             (0.05, 1),
             (0.05, 1),
             (0.05, 1)
         ]
-
         self.posicoes_alvo = [0.0] * 9
         self.posicoes_alvo_garra = [0.05] *9
         self.passo_movimento = 0.05      
         self.motor_selecionado = 0  
 
-        # TECLADO
+        # Teclado
         self.teclado = Keyboard()
         self.teclado.enable(self.passo_tempo)
 
-        # CÂMERA
-        self.camera = self.robo.getDevice("camera")
+        # Camera YOLO
+        self.MODEL_PATH = "best.pt"
+        self.CONF_THRESHOLD = 0.50
+        self.TARGET_CLASS_ID = 0 
+        self.YOLO_INTERVAL = 2
+        self.camera = self.robo.getDevice('camera')
         if not self.camera:
-            self.camera = self.robo.getDevice("camera_fixa")
-            
+            self.camera = self.robo.getDevice('camera_sensor')
         if self.camera:
             self.camera.enable(self.passo_tempo)
-            self.get_logger().info(f"Câmera iniciada: {self.camera.getName()}")
-        else:
-            self.get_logger().warn("NENHUMA CÂMERA ENCONTRADA!")
+        print(f" Carregando modelo: {self.MODEL_PATH}") 
+        self.model = YOLO(self.MODEL_PATH)
 
-        # ROS2 Publicador
-        self.publicador = self.create_publisher(
-            Float32MultiArray,
-            "coordenadas_objeto", 
-            10
-        )
+        # Publicador ROS2
+        self.pub_image = self.create_publisher(Image, '/camera/image_raw', 10)
+        self.pub_coords = self.create_publisher(Point, '/vision/object_coords', 10)
+        self.bridge = CvBridge()
 
         self.get_logger().info("Controlador UR5e iniciado com sucesso!")
 
@@ -102,13 +108,19 @@ class ControladorUR5e(Node):
         tecla = self.teclado.getKey()
         if tecla == -1: return
     
-    # Ativar modo Pick-Place automatico
+        # Ativar modo Pick-Place automatico (Space bar)
         if tecla in [32]:
             self.modo_automatico = True
             if self.modo_automatico:
                 self.get_logger().info("Modo Automático: ATIVADO")
                 self.posicoes_alvo = [0.0] * 6
                 self.posicoes_alvo_garra = [0.05] * 6
+            return
+        
+        # Desativar modo Pick-Place automatico (M)
+        if tecla in [77]:
+            self.modo_automatico = False
+            self.get_logger().info("Modo Automático: DESATIVADO")
             return
 
         # Selecionar qual motor controlar (Teclas 1 a 9)
@@ -163,57 +175,73 @@ class ControladorUR5e(Node):
                     posicao = self.posicoes_alvo_garra[indice_garra]
                     motor.setPosition(posicao)
     
-    # PROCESSAMENTO DE IMAGEM 
+    # PROCESSAMENTO DE VISÂO
     def processar_camera(self):
-        if not self.camera: return
-
-        imagem_bruta = self.camera.getImage()
-        if not imagem_bruta: return
-
-        largura = self.camera.getWidth()
-        altura = self.camera.getHeight()
+        if self.robo.step(self.passo_tempo) == -1:
+            return
+        img_w, img_h = 0, 0
         
-        img_matriz = np.frombuffer(imagem_bruta, np.uint8).reshape((altura, largura, 4))
-        img_bgr = img_matriz[:, :, :3].copy() 
+        if self.camera:
+            raw_img = self.camera.getImage()
+            if raw_img:
+                img_w = self.camera.getWidth()
+                img_h = self.camera.getHeight()
+                
+                # Conversão Webots -> OpenCV
+                np_img = np.frombuffer(raw_img, np.uint8).reshape((img_h, img_w, 4))
+                img_bgr = np_img[:, :, :3].copy()
+                
+                self.contador_loops += 1
+                
+                # Inferência (Frame Skipping para performance)
+                if self.contador_loops % self.YOLO_INTERVAL == 0:
+                    results = self.model(img_bgr, verbose=False)
+                    found_now = False
+                    
+                    for result in results:
+                        for box in result.boxes:
+                            cls_id = int(box.cls[0])
+                            conf = float(box.conf[0])
+                            
+                            if conf > self.CONF_THRESHOLD and cls_id == self.TARGET_CLASS_ID:
+                                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                                self.target_cx = (x1 + x2) // 2
+                                self.target_cy = (y1 + y2) // 2
+                                
+                                self.patience = self.max_patience
+                                found_now = True
+                                
+                                # Visualização
+                                cv2.rectangle(img_bgr, (x1, y1), (x2, y2), (255, 0, 255), 2)
+                                cv2.putText(img_bgr, f"Bola {conf:.2f}", (x1, y1-10), 
+                                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 1)
+                                break
+                        if found_now: break
+                    
+                    if not found_now:
+                        self.patience -= 1
 
-        img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
-        
-        # Faixas de cor vermelha
-        vermelho_min1 = np.array([0, 100, 100])
-        vermelho_max1 = np.array([10, 255, 255])
-        vermelho_min2 = np.array([170, 100, 100])
-        vermelho_max2 = np.array([180, 255, 255])
-        
-        # Criar máscara (Preto e Branco)
-        mascara = cv2.inRange(img_hsv, vermelho_min1, vermelho_max1) + cv2.inRange(img_hsv, vermelho_min2, vermelho_max2)
+                # Lógica de Persistência (Memória)
+                if self.patience > 0 and self.target_cx is not None:
+                    # Desenha o alvo (Vermelho = Atual, Amarelo = Memória)
+                    color = (0, 0, 255) if self.contador_loops % self.YOLO_INTERVAL == 0 else (0, 255, 255)
+                    cv2.circle(img_bgr, (self.target_cx, self.target_cy), 5, color, -1)
+                    
+                    # Publica Coordenadas no ROS
+                    point_msg = Point()
+                    point_msg.x = float(self.target_cx)
+                    point_msg.y = float(self.target_cy)
+                    self.pub_coords.publish(point_msg)
+                else:
+                    self.target_cx = None
 
-        # Achar contornos
-        contornos, _ = cv2.findContours(mascara, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                # Publica Imagem e Mostra Janela
+                msg_image = self.bridge.cv2_to_imgmsg(img_bgr, encoding="bgr8")
+                self.pub_image.publish(msg_image)
+                cv2.imshow("UR5 Vision", img_bgr)
+                cv2.waitKey(1)
 
-        if contornos:
-            # Pegar o maior contorno (para ignorar ruídos)
-            maior_contorno = max(contornos, key=cv2.contourArea)
-            area_contorno = cv2.contourArea(maior_contorno)
-
-            if area_contorno > 100:
-                momentos = cv2.moments(maior_contorno)
-                if momentos["m00"] != 0:
-                    # Calcular centro X e Y
-                    centro_x = int(momentos["m10"] / momentos["m00"])
-                    centro_y = int(momentos["m01"] / momentos["m00"])
-
-                    # Desenhar na tela
-                    cv2.drawContours(img_bgr, [maior_contorno], -1, (255, 255, 255), 2)
-                    cv2.circle(img_bgr, (centro_x, centro_y), 5, (0, 0, 0), -1)
-                    cv2.putText(img_bgr, f"X:{centro_x} Y:{centro_y}", (centro_x-20, centro_y-20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-
-                    mensagem = Float32MultiArray()
-                    mensagem.data = [float(centro_x), float(centro_y), float(area_contorno)]
-                    self.publicador.publish(mensagem)
-
-        cv2.imshow("Camera UR5e", img_bgr)
-        cv2.waitKey(1)
-
+    # EXECUTAR MODO AUTOMATICO
     def executar_modo_automatico(self):
         if self.robo.step(self.passo_tempo) == -1:
             return
@@ -242,7 +270,7 @@ class ControladorUR5e(Node):
                 self.posicoes_alvo[1] = -2
 
             if loops_passados > 15:
-                self.posicoes_alvo[2] = -1.5
+                self.posicoes_alvo[2] = -2
 
             if loops_passados > 40:
                 self.posicoes_alvo_garra = [0.05] * 6
@@ -270,3 +298,5 @@ def main(args=None):
     cv2.destroyAllWindows()
     
 main()
+
+    

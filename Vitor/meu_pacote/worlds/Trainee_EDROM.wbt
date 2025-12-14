@@ -9,12 +9,15 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/containers/protos/PlasticFruitBox.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/devices/robotiq/protos/Robotiq3fGripper.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/balls/protos/FifaSoccerBall.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Plaster.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Grass.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.21338784352965337 -0.06705737144465668 -0.9746634994544001 3.8942757856068506
-  position 3.019316287222555 -1.846239924258683 2.3486854806908846
+  orientation -0.26171922045212437 0.11024041515639113 0.958827461283874 2.2448235736156548
+  position 3.4760075823176395 -2.8494182284448955 3.1533169593190387
 }
 TexturedBackground {
 }
@@ -23,14 +26,25 @@ TexturedBackgroundLight {
 RectangleArena {
   floorSize 8 11
   floorTileSize 1 1
+  floorAppearance Plaster {
+    colorOverride 0.2 0.2 0.2
+  }
+}
+FifaSoccerBall {
+  translation 0.39 -0.76 0.7
 }
 PlasticFruitBox {
-  translation -0.78 0.28 0.6
-  color 0.6 0.6 0.6
+  translation -0.78 0.28 0.4
+  color 0.4 0.4 0.4
 }
 WoodenBox {
-  translation -0.33 0.3 0.3
-  size 1.9 0.8 0.6
+  translation 0.23 0.1 0.5
+  size 0.8 0.4 0.2
+}
+WoodenBox {
+  translation -0.37 0.3 0.2
+  name "wooden box(1)"
+  size 2 0.8 0.4
 }
 UR5e {
   translation 0 0 0.6
@@ -44,35 +58,31 @@ UR5e {
       rotation 0.7071067811862364 0.7071067811862364 9.381857096790023e-07 3.14159
     }
     Camera {
+      translation 2.24223e-07 0.09 -0.07
       rotation 0.7071067811862364 0.7071067811862364 9.381857096790023e-07 3.14159
+      fieldOfView 1
+      width 400
+      height 400
     }
     Robotiq3fGripper {
     }
   ]
 }
 ConveyorBelt {
-  translation 0.81 1.41999 0
+  translation 0.81 1.42999 0
   rotation 0 0 1 -1.5707953071795862
   size 3 0.3 0.59
 }
 SolidBox {
   translation 0.81 2.63 0.64
   size 0.1 0.1 0.1
-  appearance PBRAppearance {
-    baseColor 1 0 0
-    baseColorMap ImageTexture {
-      url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/tagged_wall.jpg"
-      ]
-    }
-    metalness 0
-    normalMapFactor 0
-    emissiveColor 1 0 0
-    emissiveIntensity 6
-  }
   physics Physics {
   }
-  recognitionColors [
-    1 0 0
-  ]
+}
+SolidBox {
+  translation -0.05 -2 0.29
+  name "box(2)"
+  size 7 3.8 0.58
+  appearance Grass {
+  }
 }
