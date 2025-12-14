@@ -7,8 +7,6 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 from ultralytics import YOLO
-
-# Importações do Webots
 from controller import Robot, Keyboard
 
 class UR5VisualController(Node):
@@ -18,17 +16,17 @@ class UR5VisualController(Node):
         # --- 1. CONFIGURAÇÕES GERAIS ---
         self.MODEL_PATH = "best.pt"
         self.CONF_THRESHOLD = 0.50
-        self.TARGET_CLASS_ID = 0  # 0 para modelo custom, 32 para COCO (bola)
+        self.TARGET_CLASS_ID = 0  # 0 para modelo (bola de futebol tradicional) próprio, 32 para COCO (bola)
         self.YOLO_INTERVAL = 2    # Roda a IA a cada N frames
         
-        # Ganhos do Controlador (P)
+        # Ganhos do Controlador (P) / Velocidade dos motores
         self.KP = 1.2
         self.VEL_MANUAL = 1.0
         
-        # Calibração de Direção dos Motores
+        # Calibração de Direção dos Motores / Para ir na direção correta
         self.CALIB_BASE = 1.0
         self.CALIB_OMBRO = -1.0
-        self.CALIB_COTOVELO = -1.0  # Configurado para alcance longo
+        self.CALIB_COTOVELO = -1.0 
         
         # --- 2. INICIALIZAÇÃO DO ROBÔ (WEBOTS) ---
         self.robot = Robot()
@@ -83,8 +81,8 @@ class UR5VisualController(Node):
         # Timer Principal
         self.create_timer(self.timestep / 1000.0, self.run_loop)
         
-        print("✅ CONTROLADOR UR5 INICIADO")
-        print(f"   Modo Inicial: {self.modos[self.modo_index]}")
+        print(" CONTROLADOR UR5 INICIADO")
+        print(f"   Modo Inicial: MANUAL")
         print("   Comandos: [M] Alternar Modo | [WASD/QE] Controle Manual")
 
     def run_loop(self):
@@ -170,7 +168,7 @@ class UR5VisualController(Node):
             # Para os motores antes de trocar
             for m in self.motors: m.setVelocity(0.0)
             self.modo_index = 1 if self.modo_index == 0 else 0
-            print(f"🔄 Modo alterado para: {self.modos[self.modo_index]}")
+            print(f" Modo alterado para: {self.modos[self.modo_index]}")
 
         modo_atual = self.modos[self.modo_index]
 
@@ -186,14 +184,20 @@ class UR5VisualController(Node):
         vels = [0.0] * 6
         v = self.VEL_MANUAL
         
-        # Mapeamento de Teclas
-        if key == ord('A'): vels[0] = v   # Base Esquerda
-        elif key == ord('D'): vels[0] = -v  # Base Direita
-        elif key == ord('W'): vels[1] = v   # Ombro Baixo
-        elif key == ord('S'): vels[1] = -v  # Ombro Cima
+        # Mapeamento de Teclas // Postivo = Esquerda/Cima , Negativo = Direita/Baixo
+        if key == ord('A'): vels[0] = v     # Base 
+        elif key == ord('D'): vels[0] = -v  # Base 
+        elif key == ord('W'): vels[1] = v   # Ombro 
+        elif key == ord('S'): vels[1] = -v  # Ombro 
         elif key == ord('Q'): vels[2] = v   # Cotovelo
-        elif key == ord('E'): vels[2] = -v
-        # Adicione mais teclas se necessário para os punhos
+        elif key == ord('E'): vels[2] = -v  # Cotovelo
+        elif key == ord('T'): vels[3] = v   # Punho 1
+        elif key == ord('G'): vels[3] = -v  # Punho 1
+        elif key == ord('F'): vels[4] = v   # Punho 2
+        elif key == ord('H'): vels[4] = -v  # Punho 2
+        elif key == ord('R'): vels[5] = v   # Punho 3
+        elif key == ord('Y'): vels[5] = -v  # Punho 3
+        
         
         for i, m in enumerate(self.motors):
             if i < len(vels):
