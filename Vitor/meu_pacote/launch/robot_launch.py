@@ -17,14 +17,10 @@ def generate_launch_description():
     ur5e_driver = WebotsController(
         robot_name='UR5e',
     )
-
-    #(
-    #)
     
     return LaunchDescription([
         webots,
         ur5e_driver,
-        #,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,

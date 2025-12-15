@@ -11,38 +11,37 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/solids/protos/SolidBox.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/balls/protos/FifaSoccerBall.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Plaster.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Grass.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.23271271077749406 0.08631703616772782 0.9687074705553838 2.3064131041530955
-  position 3.1294020495611323 -2.4553400583765925 2.465782470688829
+  orientation 0.2173756270834145 0.4492558215372986 -0.8665546973878447 1.1535375394886982
+  position -1.9313542826721724 3.9809673832535246 2.963933139232048
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 RectangleArena {
-  floorSize 8 11
+  floorSize 100 100
   floorTileSize 1 1
   floorAppearance Plaster {
     colorOverride 0.2 0.2 0.2
   }
 }
 FifaSoccerBall {
-  translation 0.83 -0.76 0.69
+  translation -4.86 -1.81 0.69
 }
 PlasticFruitBox {
-  translation -0.78 0.28 0.4
+  translation -0.71 0.28 0.29
   color 0.4 0.4 0.4
 }
 WoodenBox {
-  translation 0.23 0.1 0.5
-  size 0.8 0.4 0.2
+  translation 0.23 0.1 0.45
+  size 0.8 0.4 0.3
 }
 WoodenBox {
-  translation -0.37 0.3 0.2
+  translation -0.37 0.3 0.1
   name "wooden box(1)"
   size 2 0.8 0.4
 }
@@ -69,20 +68,72 @@ UR5e {
   ]
 }
 ConveyorBelt {
-  translation 0.81 1.42999 0
+  translation 0.81 5.42 0
   rotation 0 0 1 -1.5707953071795862
-  size 3 0.3 0.59
+  size 11 0.3 0.59
 }
 SolidBox {
-  translation 0.81 2.63 0.64
+  translation 0.81 2.08 0.64
   size 0.1 0.1 0.1
+  appearance PBRAppearance {
+    baseColor 1 0 0
+    baseColorMap ImageTexture {
+      url [
+        "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/tagged_wall.jpg"
+      ]
+    }
+    roughness 1
+    metalness 0
+    IBLStrength 0
+    emissiveColor 1 0 0
+    emissiveIntensity 6
+  }
   physics Physics {
   }
 }
 SolidBox {
-  translation -0.05 -2 0.29
-  name "box(2)"
-  size 7 3.8 0.58
-  appearance Grass {
+  translation 0.81 6.09 0.64
+  name "box(3)"
+  size 0.1 0.1 0.1
+  appearance PBRAppearance {
+    baseColor 1 0 0
+    baseColorMap ImageTexture {
+      url [
+        "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/tagged_wall.jpg"
+      ]
+    }
+    roughness 1
+    metalness 0
+    IBLStrength 0
+    emissiveColor 1 0 0
+    emissiveIntensity 6
   }
+  physics Physics {
+  }
+}
+SolidBox {
+  translation 0.81 10.1 0.64
+  name "box(4)"
+  size 0.1 0.1 0.1
+  appearance PBRAppearance {
+    baseColor 1 0 0
+    baseColorMap ImageTexture {
+      url [
+        "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/tagged_wall.jpg"
+      ]
+    }
+    roughness 1
+    metalness 0
+    IBLStrength 0
+    emissiveColor 1 0 0
+    emissiveIntensity 6
+  }
+  physics Physics {
+  }
+}
+ConveyorBelt {
+  translation -0.01 -1.81 0
+  name "conveyor belt(1)"
+  size 10 0.5 0.6
+  speed 1.2
 }
